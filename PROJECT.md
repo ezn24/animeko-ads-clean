@@ -2,7 +2,7 @@
 
 ## 專案特徵與範圍
 
-- 上游：open-ani/animeko；本儲存庫：ezn24/animeko-ads-clear；預設分支：noad-ci。
+- 上游：open-ani/animeko；本儲存庫：ezn24/animeko-ads-clean；預設分支：noad-ci。
 - 輕量補丁儲存庫：每次建置解析官方 release tag 為固定 commit，各平台共用同一份來源。
 - noad.patch 過濾播放頁推薦項目（只保留 uri 為 null 且 subjectId > 0），停用官方更新檢查。
 - 不處理影片內嵌廣告；不修改資料源、播放器或核心 UI。
@@ -74,7 +74,7 @@ PowerShell 取得檔案的 Base64（自行將結果貼到 GitHub Secret，勿貼
 
 ## 驗證狀態
 
-目前以官方 v6.2.0 作為適配基準。2026-09-28 的全平台 run 已成功產出 Android、Windows x86_64／ARM64、macOS Apple Silicon／Intel 與 Linux artifacts。完整 iOS log 顯示 `application.podspec` 因缺少 Kotlin dummy framework 而拒絕載入，現已在 `pod install` 前執行 `:app:shared:application:generateDummyFramework`。Android 簽章改用 Android SDK build-tools 內的絕對路徑；後續 Android run 在 `packageDefaultRelease` 的 Zipflinger 階段耗盡 4 GiB Gradle heap，現提高至 6 GiB、限制單一 worker，並依序建構手機與 TV。首次 publish 因 job 沒有 `.git` 且 `gh release create` 未指定 repository 而失敗，現已明確傳入 `GITHUB_REPOSITORY`。各平台 UI 與播放功能仍需實機驗證。Android 手機 debug APK 已由本地獨立編譯，不以 CI 產物替代。
+目前以官方 v6.3.0 作為適配基準。2026-10-14 起的近期排程在所有平台的 `Apply patch and configure build` 同時失敗，完整 log 顯示上游 `UpdateChecker.kt` 新增 import 後使舊補丁 context 失效；補丁已用較小 context 重新產生，並以 `git apply --check` 驗證同時相容 v6.2.0 與 v6.3.0。iOS 建構會在 `pod install` 前產生 Kotlin dummy framework。Android 使用 6 GiB Gradle heap、單一 worker，並依序建構手機與 TV。發布時明確傳入 `GITHUB_REPOSITORY`。各平台 UI 與播放功能仍需實機驗證。Android 手機 debug APK 已由本地獨立編譯，不以 CI 產物替代。
 
 ## 儲存庫維護
 

@@ -2,7 +2,7 @@
 # 下载本仓库最新 release 的去广告 dmg 并安装到 /Applications (需要 gh CLI 已登录)
 set -euo pipefail
 
-REPO=ezn24/animeko-ads-clear
+REPO=ezn24/animeko-ads-clean
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 

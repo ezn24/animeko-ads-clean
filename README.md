@@ -71,7 +71,7 @@ Android 正式簽章：
 準備 JBR 21（含 JCEF）、Android SDK platform 37.0 與 build-tools 36.0.0，取得 Animeko 原始碼後套用補丁：
 
 ```powershell
-git apply C:\path\animeko-ads-clear\noad.patch
+git apply C:\path\animeko-ads-clean\noad.patch
 ```
 
 在上游專案的 `local.properties` 設定 Android SDK、ABI 與 Debug 套件名稱：

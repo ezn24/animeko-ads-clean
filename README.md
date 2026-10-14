@@ -1,6 +1,6 @@
-# Animeko Ads Clear
+# Animeko Ads Clean
 
-基於 [open-ani/animeko](https://github.com/open-ani/animeko) 的輕量補丁版本。此儲存庫不複製上游原始碼，而是在建構時取得指定的官方版本並套用 [`noad.patch`](noad.patch)。
+基於 [open-ani/animeko](https://github.com/open-ani/animeko) 的輕量修改版本。建構時取得指定官方版本，再由 [`scripts/patch_source.py`](scripts/patch_source.py) 辨識 Kotlin 類別與函式並套用修改。行號、import、註解與排版變更不影響套用；目標檔案移動或改名後也會在共用 Kotlin 原始碼內重新尋找。
 
 ## 修改內容
 
@@ -27,6 +27,8 @@ iOS Kotlin/Native linking 的記憶體需求明顯高於其他平台。Workflow 
 ## 自動建構與發佈
 
 Workflow 每 6 小時檢查一次 Animeko 最新穩定版。若本儲存庫尚未建立對應的 `vX.Y.Z-noad` Release，便會自動建構所有平台、簽署 Android APK，並建立 GitHub Release；已有相同版本時會略過，避免重複建構。
+
+開始平台建構前，先用一個共用 `preflight` 工作執行離線測試及上游相容性檢查。若目標函式的功能結構改變，只會在這個小工作停止，所有平台建構均略過，不發布缺少修改的套件。
 
 修改 `noad.patch`、workflow 或 `scripts/` 建構工具並推送至 `noad-ci` 時，也會自動建構尚未發佈的目前上游版本。
 
@@ -71,7 +73,7 @@ Android 正式簽章：
 準備 JBR 21（含 JCEF）、Android SDK platform 37.0 與 build-tools 36.0.0，取得 Animeko 原始碼後套用補丁：
 
 ```powershell
-git apply C:\path\animeko-ads-clean\noad.patch
+python C:\path\animeko-ads-clean\scripts\patch_source.py C:\path\animeko
 ```
 
 在上游專案的 `local.properties` 設定 Android SDK、ABI 與 Debug 套件名稱：
@@ -95,7 +97,7 @@ APK 位於 `app/android/build/outputs/apk/default/debug/`。不要使用 `assemb
 
 - 未設定 `DANDANPLAY_APP_ID` 與 `DANDANPLAY_APP_SECRET` 時，Actions 產物無法使用彈彈play彈幕來源。
 - Firebase 預設停用。
-- 補丁以 Animeko `v6.2.0` 驗證；上游結構改變而無法套用時，workflow 會直接失敗。
+- 修改器已驗證 Animeko `v6.2.0`／`v6.3.0`。上游若改變目標函式的功能結構，仍需適配；檢查會在全平台建構前停止。`noad.patch` 保留作為舊版參考，正式建构使用修改器。
 - 各平台仍需實機驗證。完整設計與維護紀錄請見 [`PROJECT.md`](PROJECT.md)。
 
 ## 授權

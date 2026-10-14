@@ -58,8 +58,28 @@ jobs:
             core.setOutput('should_build', context.eventName === 'workflow_dispatch' || !releaseExists);
             core.setOutput('should_publish', !releaseExists);
 
-  build:
+  preflight:
     needs: resolve
+    if: needs.resolve.outputs.should_build == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: open-ani/animeko
+          ref: ${{ needs.resolve.outputs.sha }}
+          path: src
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Test source transformations
+        run: python -m unittest discover -s scripts -p 'test_*.py'
+      - name: Check upstream compatibility once before starting runners
+        run: python scripts/patch_source.py src --check
+
+  build:
+    needs: [resolve, preflight]
     if: needs.resolve.outputs.should_build == 'true'
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.runner }}

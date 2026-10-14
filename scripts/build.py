@@ -8,6 +8,10 @@ import shutil
 import subprocess
 import sys
 import urllib.request
+if __package__:
+    from .patch_source import apply as apply_noad
+else:
+    from patch_source import apply as apply_noad
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / 'src'
@@ -43,13 +47,7 @@ def prepare():
         raise RuntimeError('Invalid upstream release tag')
     target = os.environ['TARGET']
     mode = os.environ.get('BUILD_TYPE', 'release')
-    # Git for Windows may check out CRLF; patch context uses canonical LF.
-    for p in [ROOT / 'noad.patch',
-              SRC / 'app/shared/app-data/src/commonMain/kotlin/domain/episode/GetSubjectRecommendationFlowUseCase.kt',
-              SRC / 'app/shared/ui-settings/src/commonMain/kotlin/ui/update/UpdateChecker.kt']:
-        p.write_bytes(p.read_bytes().replace(b'\r\n', b'\n'))
-    run('git', 'apply', '--check', str(ROOT / 'noad.patch'))
-    run('git', 'apply', str(ROOT / 'noad.patch'))
+    apply_noad(SRC)
     version = tag[1:]
     major, minor, patch = map(int, version.split('-')[0].split('.'))
     meta = 99
@@ -107,7 +105,7 @@ def prepare():
     OUT.mkdir(exist_ok=True)
     commit = run('git', 'rev-parse', 'HEAD', capture_output=True, text=True).stdout.strip()
     manifest = {'upstream_tag': tag, 'upstream_commit': commit, 'target': target,
-                'build_type': mode, 'patch_sha256': hashlib.sha256((ROOT/'noad.patch').read_bytes()).hexdigest(),
+                'build_type': mode, 'patcher_sha256': hashlib.sha256((ROOT/'scripts/patch_source.py').read_bytes()).hexdigest(),
                 'workflow_commit': os.environ.get('GITHUB_SHA'),
                 'ios_signed': False}
     (OUT / ('build-info-' + target + '.json')).write_text(json.dumps(manifest, indent=2) + '\n')

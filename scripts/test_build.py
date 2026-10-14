@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-spec = importlib.util.spec_from_file_location('build', Path(__file__).with_name('build.py'))
+spec = importlib.util.spec_from_file_location('scripts.build', Path(__file__).with_name('build.py'))
 build = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(build)
 
